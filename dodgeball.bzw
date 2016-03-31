@@ -18,17 +18,16 @@ end
 options
     -a 0 0
     -c
-    -mp 0,7,7,0,0,50
+    -maxidle 30
+    -mp 0,10,10,0,0,50
     -ms 3
     -noTeamKills
     +r
-    -set _explodeTime 0
     -set _hideTeamFlagsOnRadar 1
     -set _radarLimit 500
     -set _tankSpeed 25
     -set _wallHeight 0
     -set _worldSize 2000
-    -srvmsg ""
     -srvmsg "Welcome to Dodgeball recreated by allejo (Originally by Winny)"
     -srvmsg ""
     -srvmsg "How To Play Dodgeball"
