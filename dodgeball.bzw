@@ -11,15 +11,14 @@
 # Do not steal credit for my work.
 
 world
-	freeCTFSpawns
-	noWalls
+    freeCTFSpawns
+    noWalls
 end
 
 options
     -a 0 0
     -c
-    -loadplugin /usr/local/lib/bzflag/dodgeball.so
-    -mp 0,7,0,7,0,50
+    -mp 0,7,7,0,0,50
     -ms 3
     -noTeamKills
     +r
@@ -29,7 +28,7 @@ options
     -set _tankSpeed 25
     -set _wallHeight 0
     -set _worldSize 2000
-	-srvmsg ""
+    -srvmsg ""
     -srvmsg "Welcome to Dodgeball recreated by allejo (Originally by Winny)"
     -srvmsg ""
     -srvmsg "How To Play Dodgeball"
@@ -70,19 +69,19 @@ end
 jail
    position 0 339 0
    size 10 2 2
-   color 3
+   color 2
 end
 
 jail
    position -229 175 0
    size 2 150 2
-   color 3
+   color 2
 end
 
 jail
    position 229 175 0
    size 2 150 2
-   color 3
+   color 2
 end
 
 #Spawn Zones
@@ -97,14 +96,14 @@ zone
     #Blue Spawn Zone
     pos 0 -151 0
     size 196 149 0.1
-    team 3
+    team 2
 end
 
 zone
     #I don't want the flags on this map, so hide them where no one will find them
     pos 9999 9999 0
     size 0.1 0.1 0.1
-    zoneflag B*
+    zoneflag G*
     zoneflag R*
 end
 
@@ -117,7 +116,7 @@ end
 base
     pos 0 -151 -999
     size 196 149 0.1
-    color 3
+    color 2
 end
 
 #Mesh Perimeter

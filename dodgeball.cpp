@@ -67,7 +67,7 @@ const std::string PLUGIN_NAME = "Dodgeball";
 const int MAJOR = 1;
 const int MINOR = 0;
 const int REV = 0;
-const int BUILD = 1;
+const int BUILD = 3;
 
 template<typename Iter, typename RandomGenerator>
 Iter select_randomly(Iter start, Iter end, RandomGenerator& g) {
@@ -94,25 +94,42 @@ public:
 class Dodgeball : public bz_Plugin, bz_CustomMapObjectHandler
 {
 public:
-    virtual const char* Name () {return "Dodgeball";}
+    virtual const char* Name ();
     virtual void Init (const char* config);
     virtual void Event (bz_EventData *eventData);
     virtual void Cleanup (void);
 
     virtual bool MapObject (bz_ApiString object, bz_CustomMapObjectInfo *data);
 
-    virtual bool checkGameOver (void);
+    virtual bool isEntireTeamInJail (bz_eTeamType _team);
+    virtual void checkGameOver (void);
+    virtual void killAll (void);
 
     typedef std::vector<TeamJail> ZoneVector;
     std::map<bz_eTeamType, ZoneVector> TeamJails;
 
-    std::std::vector<bz_eTeamType> availableTeams;
+    std::vector<bz_eTeamType> availableTeams;
 
     bool gamemodeEnabled;
     bool inJail[256];
 };
 
 BZ_PLUGIN(Dodgeball)
+
+const char* Dodgeball::Name (void)
+{
+    static std::string pluginBuild = "";
+
+    if (!pluginBuild.size())
+    {
+        std::ostringstream pluginBuildStream;
+
+        pluginBuildStream << PLUGIN_NAME << " " << MAJOR << "." << MINOR << "." << REV << " (" << BUILD << ")";
+        pluginBuild = pluginBuildStream.str();
+    }
+
+    return pluginBuild.c_str();
+}
 
 void Dodgeball::Init (const char* commandLine)
 {
@@ -139,7 +156,7 @@ void Dodgeball::Cleanup (void)
     Flush(); // Clean up all the events
 }
 
-bool SpawnAtBase::MapObject (bz_ApiString object, bz_CustomMapObjectInfo *data)
+bool Dodgeball::MapObject (bz_ApiString object, bz_CustomMapObjectInfo *data)
 {
     if (object != "JAIL" || !data)
     {
@@ -198,7 +215,7 @@ void Dodgeball::Event (bz_EventData *eventData)
                 float spawnPos[3];
 
                 TeamJail zone = *select_randomly(TeamJails[spawnData->team].begin(), TeamJails[spawnData->team].end());
-                zone.zoneRandomPoint(spawnPos);
+                zone.getRandomPoint(spawnPos);
 
                 spawnData->pos[0] = spawnPos[0];
                 spawnData->pos[1] = spawnPos[1];
@@ -217,9 +234,9 @@ void Dodgeball::Event (bz_EventData *eventData)
 
                 if (inJail[dieData->killerID] && dieData->playerID != dieData->killerID)
                 {
-                    inJail[dieData->killerID] = false;
-                    bz_killPlayer(dieData->killerID);
+                    bz_killPlayer(dieData->killerID, false);
                     bz_incrementPlayerWins(dieData->killerID, 1);
+                    inJail[dieData->killerID] = false;
                 }
 
                 checkGameOver();
@@ -259,7 +276,7 @@ void Dodgeball::Event (bz_EventData *eventData)
             if (!gamemodeEnabled)
             {
                 bz_sendTextMessage(BZ_SERVER, BZ_ALLUSERS, "Dodgeball has been enabled!");
-                gamemodeEnabled = false;
+                gamemodeEnabled = true;
             }
         }
         break;
@@ -270,8 +287,8 @@ void Dodgeball::Event (bz_EventData *eventData)
 
 void Dodgeball::checkGameOver (void)
 {
-    int teamsFree;
-    bz_eTeamType winningTeam;
+    int teamsFree = 0;
+    bz_eTeamType winningTeam = eNoTeam;
 
     for (auto team : availableTeams)
     {
@@ -329,7 +346,7 @@ bool Dodgeball::isEntireTeamInJail (bz_eTeamType _team)
     return entireTeamInJail;
 }
 
-bool Dodgeball::killAll (void)
+void Dodgeball::killAll (void)
 {
     bz_APIIntList *playerList = bz_newIntList();
     bz_getPlayerIndexList(playerList);
@@ -340,7 +357,7 @@ bool Dodgeball::killAll (void)
 
         if (inJail[playerID])
         {
-            bz_killPlayer(playerID);
+            bz_killPlayer(playerID, false);
         }
 
         inJail[playerID] = false;
