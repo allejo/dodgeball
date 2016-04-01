@@ -66,8 +66,8 @@ const std::string PLUGIN_NAME = "Dodgeball";
 // Define plugin version numbering
 const int MAJOR = 1;
 const int MINOR = 0;
-const int REV = 0;
-const int BUILD = 3;
+const int REV = 1;
+const int BUILD = 4;
 
 template<typename Iter, typename RandomGenerator>
 Iter select_randomly(Iter start, Iter end, RandomGenerator& g) {
@@ -301,7 +301,7 @@ void Dodgeball::checkGameOver (void)
 
     if (teamsFree == 1)
     {
-        bz_sendTextMessagef(BZ_SERVER, BZ_ALLUSERS, "The %s team successfully eliminated the other %s!", eTeamTypeLiteral(winningTeam),
+        bz_sendTextMessagef(BZ_SERVER, BZ_ALLUSERS, "The %s team successfully eliminated the other %s!", bz_tolower(eTeamTypeLiteral(winningTeam)),
             (availableTeams.size() > 2) ? "teams" : "team");
 
         bz_incrementTeamWins(winningTeam, 1);
@@ -334,7 +334,7 @@ bool Dodgeball::isEntireTeamInJail (bz_eTeamType _team)
     {
         int playerID = playerList->get(i);
 
-        if (bz_getPlayerTeam(playerID) == _team && !inJail[playerID])
+        if (bz_getPlayerTeam(playerID) == _team && !inJail[playerID] || bz_getIdleTime(playerID) < 30)
         {
             entireTeamInJail = false;
             break;
