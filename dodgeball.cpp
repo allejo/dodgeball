@@ -68,7 +68,7 @@ const std::string PLUGIN_NAME = "Dodgeball";
 const int MAJOR = 1;
 const int MINOR = 0;
 const int REV = 2;
-const int BUILD = 6;
+const int BUILD = 7;
 
 template<typename Iter, typename RandomGenerator>
 Iter select_randomly(Iter start, Iter end, RandomGenerator& g) {
@@ -132,7 +132,7 @@ const char* Dodgeball::Name (void)
     return pluginBuild.c_str();
 }
 
-void Dodgeball::Init (const char* commandLine)
+void Dodgeball::Init (const char* /*commandLine*/)
 {
     bz_registerCustomMapObject("JAIL", this);
 
@@ -261,8 +261,6 @@ void Dodgeball::Event (bz_EventData *eventData)
 
         case bz_ePlayerPartEvent:
         {
-            bz_PlayerJoinPartEventData_V1* partData = (bz_PlayerJoinPartEventData_V1*)eventData;
-
             if (gamemodeEnabled)
             {
                 checkGameOver();
