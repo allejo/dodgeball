@@ -17,6 +17,7 @@ Dodgeball
 */
 
 #include <iterator>
+#include <map>
 #include <random>
 #include <sstream>
 #include <vector>
@@ -66,12 +67,12 @@ const std::string PLUGIN_NAME = "Dodgeball";
 // Define plugin version numbering
 const int MAJOR = 1;
 const int MINOR = 0;
-const int REV = 1;
-const int BUILD = 4;
+const int REV = 2;
+const int BUILD = 6;
 
 template<typename Iter, typename RandomGenerator>
 Iter select_randomly(Iter start, Iter end, RandomGenerator& g) {
-    std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
+    std::uniform_int_distribution<> dis(0, (int)(std::distance(start, end) - 1));
     std::advance(start, dis(g));
 
     return start;
@@ -85,10 +86,10 @@ Iter select_randomly(Iter start, Iter end) {
     return select_randomly(start, end, gen);
 }
 
-class TeamJail : public bz_CustomZoneObject_V2
+class TeamJail : public bz_CustomZoneObject
 {
 public:
-    TeamJail() : bz_CustomZoneObject_V2() {}
+    TeamJail() : bz_CustomZoneObject() {}
 };
 
 class Dodgeball : public bz_Plugin, bz_CustomMapObjectHandler
@@ -148,6 +149,7 @@ void Dodgeball::Init (const char* commandLine)
     Register(bz_eGetPlayerSpawnPosEvent);
     Register(bz_ePlayerDieEvent);
     Register(bz_ePlayerJoinEvent);
+    Register(bz_ePlayerPartEvent);
     Register(bz_eTickEvent);
 }
 
@@ -215,7 +217,7 @@ void Dodgeball::Event (bz_EventData *eventData)
                 float spawnPos[3];
 
                 TeamJail zone = *select_randomly(TeamJails[spawnData->team].begin(), TeamJails[spawnData->team].end());
-                zone.getRandomPoint(spawnPos);
+                bz_getRandomPoint((bz_CustomZoneObject*)&zone, spawnPos);
 
                 spawnData->pos[0] = spawnPos[0];
                 spawnData->pos[1] = spawnPos[1];
@@ -254,6 +256,17 @@ void Dodgeball::Event (bz_EventData *eventData)
             }
 
             inJail[joinData->playerID] = false;
+        }
+        break;
+
+        case bz_ePlayerPartEvent:
+        {
+            bz_PlayerJoinPartEventData_V1* partData = (bz_PlayerJoinPartEventData_V1*)eventData;
+
+            if (gamemodeEnabled)
+            {
+                checkGameOver();
+            }
         }
         break;
 
@@ -334,7 +347,7 @@ bool Dodgeball::isEntireTeamInJail (bz_eTeamType _team)
     {
         int playerID = playerList->get(i);
 
-        if (bz_getPlayerTeam(playerID) == _team && !inJail[playerID] || bz_getIdleTime(playerID) < 30)
+        if (bz_getPlayerTeam(playerID) == _team && (!inJail[playerID] || bz_getIdleTime(playerID) < 30))
         {
             entireTeamInJail = false;
             break;
