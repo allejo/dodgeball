@@ -10,10 +10,12 @@ AM_CFLAGS = $(CONF_CFLAGS)
 AM_CXXFLAGS = $(CONF_CXXFLAGS)
 
 EXTRA_DIST = \
+	LICENSE.md \
 	README.md \
 	dodgeball.def \
 	dodgeball.sln \
-	dodgeball.vcxproj
+	dodgeball.vcxproj \
+	dodgeball.vcxproj.filters
 
 MAINTAINERCLEANFILES =	\
 	Makefile.in
