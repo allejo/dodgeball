@@ -1,151 +1,126 @@
 /*
-Dodgeball
-    Copyright (C) 2016 Vladimir "allejo" Jimenez
+ * Copyright (C) 2018 Vladimir "allejo" Jimenez
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
-    This program is free software; you can redistribute it and/or modify it under
-    the terms of the GNU General Public License as published by the Free Software
-    Foundation; either version 2 of the License, or (at your option) any later
-    version.
-
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License along with
-    this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-    Place, Suite 330, Boston, MA 02111-1307 USA
-*/
-
-#include <iterator>
 #include <map>
 #include <random>
-#include <sstream>
-#include <vector>
 
 #include "bzfsAPI.h"
 #include "plugin_utils.h"
-
-static const char* eTeamTypeLiteral(bz_eTeamType _team)
-{
-    switch (_team)
-    {
-        case eRogueTeam:
-            return "Rogue";
-
-        case eRedTeam:
-            return "Red";
-
-        case eGreenTeam:
-            return "Green";
-
-        case eBlueTeam:
-            return "Blue";
-
-        case ePurpleTeam:
-            return "Purple";
-
-        case eRabbitTeam:
-            return "Rabbit";
-
-        case eHunterTeam:
-            return "Hunter";
-
-        case eObservers:
-            return "Observer";
-
-        case eAdministrators:
-            return "Administrator";
-
-        default:
-            return "No";
-    }
-}
 
 // Define plugin name
 const std::string PLUGIN_NAME = "Dodgeball";
 
 // Define plugin version numbering
 const int MAJOR = 1;
-const int MINOR = 0;
-const int REV = 2;
+const int MINOR = 1;
+const int REV = 0;
 const int BUILD = 7;
 
-template<typename Iter, typename RandomGenerator>
-Iter select_randomly(Iter start, Iter end, RandomGenerator& g) {
-    std::uniform_int_distribution<> dis(0, (int)(std::distance(start, end) - 1));
-    std::advance(start, dis(g));
-
-    return start;
-}
-
-template<typename Iter>
-Iter select_randomly(Iter start, Iter end) {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());
-
-    return select_randomly(start, end, gen);
-}
+const int MAX_PLAYER_ID = 256;
 
 class TeamJail : public bz_CustomZoneObject
 {
 public:
+    typedef std::vector<TeamJail> Vector;
+
     TeamJail() : bz_CustomZoneObject() {}
 };
 
-class Dodgeball : public bz_Plugin, bz_CustomMapObjectHandler
+class Dodgeball : public bz_Plugin, public bz_CustomMapObjectHandler
 {
 public:
-    virtual const char* Name ();
-    virtual void Init (const char* config);
-    virtual void Event (bz_EventData *eventData);
-    virtual void Cleanup (void);
+    virtual const char* Name();
+    virtual void Init(const char* config);
+    virtual void Event(bz_EventData *eventData);
+    virtual void Cleanup(void);
 
-    virtual bool MapObject (bz_ApiString object, bz_CustomMapObjectInfo *data);
+    virtual bool MapObject(bz_ApiString object, bz_CustomMapObjectInfo *data);
 
-    virtual bool isEntireTeamInJail (bz_eTeamType _team);
-    virtual void checkGameOver (void);
-    virtual void killAll (void);
+private:
+    std::vector<bz_eTeamType> getAvailableTeams();
 
-    typedef std::vector<TeamJail> ZoneVector;
-    std::map<bz_eTeamType, ZoneVector> TeamJails;
+    bool isEntireTeamInJail(bz_eTeamType _team);
+    bool safelyFreePrisoner(int playerID);
+    void checkGameOver(void);
 
-    std::vector<bz_eTeamType> availableTeams;
+    std::map<bz_eTeamType, TeamJail::Vector> TeamJails;
 
-    bool gamemodeEnabled;
-    bool inJail[256];
+    bz_eTeamType TEAM_ONE = eNoTeam;
+    bz_eTeamType TEAM_TWO = eNoTeam;
+
+    /// When true, checking for "game over" status is disabled while the plug-in is cleaning itself. The plug-in checks
+    /// for a "game over" state each time a player dies and since some players need to be killed to be freed from jail,
+    /// this lock prevents the plug-in while triggering another "game over" while players are being freed.
+    bool gameOverCheckLocked = false;
+
+    /// A minimum of 2 players per team is required. This boolean keeps track of when there are enough players on each
+    /// team to allow for a game of dodgeball to start.
+    bool gameModeEnabled = false;
+
+    /// An array to store whether or not a player ID is marked as being in jail.
+    bool inJail[MAX_PLAYER_ID] = {false};
 };
 
 BZ_PLUGIN(Dodgeball)
 
-const char* Dodgeball::Name (void)
+const char* Dodgeball::Name(void)
 {
-    static std::string pluginBuild = "";
+    static std::string pluginName;
 
-    if (!pluginBuild.size())
+    if (pluginName.empty())
     {
-        std::ostringstream pluginBuildStream;
-
-        pluginBuildStream << PLUGIN_NAME << " " << MAJOR << "." << MINOR << "." << REV << " (" << BUILD << ")";
-        pluginBuild = pluginBuildStream.str();
+        pluginName = bz_format("%s %d.%d.%d (%d)", PLUGIN_NAME.c_str(), MAJOR, MINOR, REV, BUILD);
     }
 
-    return pluginBuild.c_str();
+    return pluginName.c_str();
 }
 
-void Dodgeball::Init (const char* /*commandLine*/)
+void Dodgeball::Init(const char* /*commandLine*/)
 {
-    bz_registerCustomMapObject("JAIL", this);
-
-    for (bz_eTeamType t = eRedTeam; t <= ePurpleTeam; t = (bz_eTeamType) (t + 1))
+    if (bz_getGameType() != eCTFGame)
     {
-        if (bz_getTeamPlayerLimit(t) > 0)
-        {
-            availableTeams.push_back(t);
-        }
+        bz_debugMessagef(0, "ERROR :: %s :: The dodgeball game mode requires a CTF server. This plug-in will **fail** to load.", PLUGIN_NAME.c_str());
+
+        return;
     }
 
-    // Register our events with Register()
-    Register(bz_eAllowCTFCaptureEvent);
+    auto teams = getAvailableTeams();
+
+    if (teams.size() != 2)
+    {
+        bz_debugMessagef(0, "ERROR :: %s :: The dodgeball game mode only works with two teams. This plug-in will **fail** to load.", PLUGIN_NAME.c_str());
+        bz_debugMessagef(0, "ERROR :: %S ::   %d teams have been detected.", PLUGIN_NAME.c_str(), teams.size());
+
+        return;
+    }
+    else
+    {
+        TEAM_ONE = teams.at(0);
+        TEAM_TWO = teams.at(1);
+    }
+
+    bz_registerCustomMapObject("jail", this);
+
+    Register(bz_eCaptureEvent);
     Register(bz_eGetPlayerSpawnPosEvent);
     Register(bz_ePlayerDieEvent);
     Register(bz_ePlayerJoinEvent);
@@ -153,19 +128,21 @@ void Dodgeball::Init (const char* /*commandLine*/)
     Register(bz_eTickEvent);
 }
 
-void Dodgeball::Cleanup (void)
+void Dodgeball::Cleanup(void)
 {
-    Flush(); // Clean up all the events
+    Flush();
+
+    bz_removeCustomMapObject("jail");
 }
 
-bool Dodgeball::MapObject (bz_ApiString object, bz_CustomMapObjectInfo *data)
+bool Dodgeball::MapObject(bz_ApiString object, bz_CustomMapObjectInfo *data)
 {
     if (object != "JAIL" || !data)
     {
         return false;
     }
 
-    bz_eTeamType team;
+    bz_eTeamType team = eNoTeam;
     TeamJail newZone;
     newZone.handleDefaultOptions(data);
 
@@ -194,30 +171,40 @@ bool Dodgeball::MapObject (bz_ApiString object, bz_CustomMapObjectInfo *data)
     return true;
 }
 
-void Dodgeball::Event (bz_EventData *eventData)
+void Dodgeball::Event(bz_EventData *eventData)
 {
     switch (eventData->eventType)
     {
-        case bz_eAllowCTFCaptureEvent: // This event is called each time a flag is about to be captured
+        case bz_eCaptureEvent:
         {
-            bz_AllowCTFCaptureEventData_V1* allowCtfData = (bz_AllowCTFCaptureEventData_V1*)eventData;
+            // On a capture, free everyone from prison
+            bz_APIIntList *playerList = bz_getPlayerIndexList();
 
-            allowCtfData->allow = false;
+            for (unsigned int i = 0; i < playerList->size(); ++i)
+            {
+                safelyFreePrisoner(playerList->get(i));
+            }
+
+            bz_deleteIntList(playerList);
+
+            gameOverCheckLocked = false;
         }
         break;
 
-        case bz_eGetPlayerSpawnPosEvent: // This event is called each time the server needs a new spawn postion
+        case bz_eGetPlayerSpawnPosEvent:
         {
             bz_GetPlayerSpawnPosEventData_V1* spawnData = (bz_GetPlayerSpawnPosEventData_V1*)eventData;
 
-            if (gamemodeEnabled && inJail[spawnData->playerID] && !TeamJails[spawnData->team].empty())
+            if (gameModeEnabled && inJail[spawnData->playerID] && !TeamJails[spawnData->team].empty())
             {
                 spawnData->handled = true;
 
                 float spawnPos[3];
+                auto randomJailID = rand() * TeamJails.size();
 
-                TeamJail zone = *select_randomly(TeamJails[spawnData->team].begin(), TeamJails[spawnData->team].end());
-                bz_getRandomPoint((bz_CustomZoneObject*)&zone, spawnPos);
+                TeamJail zone = TeamJails[spawnData->team].at(randomJailID);
+
+                bz_getRandomPoint(&zone, spawnPos);
 
                 spawnData->pos[0] = spawnPos[0];
                 spawnData->pos[1] = spawnPos[1];
@@ -226,19 +213,18 @@ void Dodgeball::Event (bz_EventData *eventData)
         }
         break;
 
-        case bz_ePlayerDieEvent: // This event is called each time a tank is killed.
+        case bz_ePlayerDieEvent:
         {
             bz_PlayerDieEventData_V1* dieData = (bz_PlayerDieEventData_V1*)eventData;
 
-            if (gamemodeEnabled)
+            if (gameModeEnabled)
             {
                 inJail[dieData->playerID] = true;
 
+                // If the killer was in jail, set them free
                 if (inJail[dieData->killerID] && dieData->playerID != dieData->killerID)
                 {
-                    bz_killPlayer(dieData->killerID, false);
-                    bz_incrementPlayerWins(dieData->killerID, 1);
-                    inJail[dieData->killerID] = false;
+                    safelyFreePrisoner(dieData->killerID);
                 }
 
                 checkGameOver();
@@ -246,13 +232,13 @@ void Dodgeball::Event (bz_EventData *eventData)
         }
         break;
 
-        case bz_ePlayerJoinEvent: // This event is called each time a player joins the game
+        case bz_ePlayerJoinEvent:
         {
             bz_PlayerJoinPartEventData_V1* joinData = (bz_PlayerJoinPartEventData_V1*)eventData;
 
-            if (!gamemodeEnabled)
+            if (!gameModeEnabled)
             {
-                bz_sendTextMessage(BZ_SERVER, joinData->playerID, "Dodgeball has been disabled; a minimum of 2 players per team is needed.");
+                bz_sendTextMessage(BZ_SERVER, joinData->playerID, "Dodgeball is disabled; a minimum of 2 players per team is needed.");
             }
 
             inJail[joinData->playerID] = false;
@@ -261,7 +247,7 @@ void Dodgeball::Event (bz_EventData *eventData)
 
         case bz_ePlayerPartEvent:
         {
-            if (gamemodeEnabled)
+            if (gameModeEnabled)
             {
                 checkGameOver();
             }
@@ -270,66 +256,94 @@ void Dodgeball::Event (bz_EventData *eventData)
 
         case bz_eTickEvent:
         {
-            for (auto team : availableTeams)
+            if (bz_getTeamCount(TEAM_ONE) < 2 || bz_getTeamCount(TEAM_TWO) < 2)
             {
-                if (bz_getTeamCount(team) < 2)
+                if (gameModeEnabled)
                 {
-                    if (gamemodeEnabled)
-                    {
-                        bz_sendTextMessage(BZ_SERVER, BZ_ALLUSERS, "Dodgeball has been disabled; a minimum of 2 players per team is needed.");
-                        gamemodeEnabled = false;
-                    }
-
-                    return;
+                    bz_sendTextMessage(BZ_SERVER, BZ_ALLUSERS, "Dodgeball has been disabled; a minimum of 2 players per team is needed.");
+                    gameModeEnabled = false;
                 }
+
+                return;
             }
 
-            if (!gamemodeEnabled)
+            if (!gameModeEnabled)
             {
                 bz_sendTextMessage(BZ_SERVER, BZ_ALLUSERS, "Dodgeball has been enabled!");
-                gamemodeEnabled = true;
+                gameModeEnabled = true;
             }
         }
         break;
 
-        default: break;
+        default:
+            break;
     }
 }
 
-void Dodgeball::checkGameOver (void)
+/**
+ * Get a list of all the teams available on the current server.
+ *
+ * @return A vector of teams loaded on the server
+ */
+std::vector<bz_eTeamType> Dodgeball::getAvailableTeams()
 {
+    std::vector<bz_eTeamType> teams;
+
+    for (bz_eTeamType t = eRedTeam; t <= ePurpleTeam; t = (bz_eTeamType) (t + 1))
+    {
+        if (bz_getTeamPlayerLimit(t) > 0)
+        {
+            teams.push_back(t);
+        }
+    }
+
+    return teams;
+}
+
+/**
+ * The win condition for a game dodgeball is to be the last team
+ */
+void Dodgeball::checkGameOver(void)
+{
+    if (gameOverCheckLocked)
+    {
+        return;
+    }
+
     int teamsFree = 0;
     bz_eTeamType winningTeam = eNoTeam;
+    bz_eTeamType losingTeam = eNoTeam;
 
-    for (auto team : availableTeams)
+    if (!isEntireTeamInJail(TEAM_ONE))
     {
-        if (!isEntireTeamInJail(team))
-        {
-            winningTeam = team;
-            teamsFree++;
-        }
+        winningTeam = TEAM_ONE;
+        losingTeam = TEAM_TWO;
+        teamsFree++;
+    }
+
+    if (!isEntireTeamInJail(TEAM_TWO))
+    {
+        winningTeam = TEAM_TWO;
+        losingTeam = TEAM_ONE;
+        teamsFree++;
     }
 
     if (teamsFree == 1)
     {
-        bz_sendTextMessagef(BZ_SERVER, BZ_ALLUSERS, "The %s team successfully eliminated the other %s!", bz_tolower(eTeamTypeLiteral(winningTeam)),
-            (availableTeams.size() > 2) ? "teams" : "team");
-
-        bz_incrementTeamWins(winningTeam, 1);
-
-        for (auto team : availableTeams)
-        {
-            if (team != winningTeam)
-            {
-                bz_incrementTeamLosses(team, 1);
-            }
-        }
-
-        killAll();
+        gameOverCheckLocked = true;
+        // @TODO Change BZ_SERVER to a player on the winning team
+        bz_triggerFlagCapture(BZ_SERVER, winningTeam, losingTeam);
     }
 }
 
-bool Dodgeball::isEntireTeamInJail (bz_eTeamType _team)
+/**
+ * Check to see if all the players on a team are in jail.
+ *
+ * @param _team The team to check
+ *
+ * @return True if the entire team is in jail
+ */
+bool Dodgeball::isEntireTeamInJail(bz_eTeamType _team)
 {
     if (bz_getTeamCount(_team) < 2)
     {
@@ -357,20 +371,37 @@ bool Dodgeball::isEntireTeamInJail (bz_eTeamType _team)
     return entireTeamInJail;
 }
 
-void Dodgeball::killAll (void)
+/**
+ * This method will release a player from jail.
+ *
+ * If the player is alive, it will mark the player as free, kill the player, and offset their score by one if they were
+ * killed in the freedom process.
+ *
+ * This method can safely be given any player ID, valid or invalid.
+ *
+ * @param playerID The ID of the player currently in jail to set free
+ *
+ * @return True if a player was in jail and was set free
+ */
+bool Dodgeball::safelyFreePrisoner(int playerID)
 {
-    bz_APIIntList *playerList = bz_newIntList();
-    bz_getPlayerIndexList(playerList);
-
-    for (unsigned int i = 0; i < playerList->size(); i++)
+    if (playerID > MAX_PLAYER_ID)
     {
-        int playerID = playerList->get(i);
-
-        if (inJail[playerID])
-        {
-            bz_killPlayer(playerID, false);
-        }
-
-        inJail[playerID] = false;
+        return false;
     }
+
+    if (!inJail[playerID])
+    {
+        return false;
+    }
+
+    inJail[playerID] = false;
+
+    if (bz_killPlayer(playerID, false))
+    {
+        // Only increment a player's score if they were actually killed to offset the point loss for dying
+        bz_incrementPlayerWins(playerID, 1);
+    }
+
+    return true;
 }
