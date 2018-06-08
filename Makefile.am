@@ -12,6 +12,7 @@ AM_CXXFLAGS = $(CONF_CXXFLAGS)
 EXTRA_DIST = \
 	LICENSE.md \
 	README.md \
+	dodgeball.bzw \
 	dodgeball.def \
 	dodgeball.sln \
 	dodgeball.vcxproj \
