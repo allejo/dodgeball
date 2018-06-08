@@ -1,14 +1,10 @@
 # Dodgeball
 #
 # Author: Vladimir "allejo" Jimenez
-# License: All rights reserved
+# License: CC BY-SA 3.0
 #
-# The original map design was by Winny and I do not take
-# credit for making the design. I simply recreated it as
-# best as I could from scratch since the original file
-# was lost.
-#
-# Do not steal credit for my work.
+# This map is based on Winny's Dodgeball map. I recreated the map as best as I
+# could from scratch since the original map was never released.
 
 world
     freeCTFSpawns
@@ -34,10 +30,10 @@ options
     -srvmsg "---------------------"
     -srvmsg "Shoot the opposing team and do not get shot! Watch"
     -srvmsg "out as there are enemies shooting at you from the"
-    -srvmsg "jails around you. If you get shot you end up in jail"
-    -srvmsg "and you must shoot an enemy from inside the jail to"
-    -srvmsg "be set free. Once an entire team is in jail, the"
-    -srvmsg "winning team caps."
+    -srvmsg "jails around you. If you get shot you end up in jail,"
+    -srvmsg "you must shoot an enemy from inside the jail to be"
+    -srvmsg "set free. Once an entire team is in jail, the free team"
+    -srvmsg "wins the round."
 end
 
 material
@@ -45,7 +41,7 @@ material
    texture http://images.bzflag.org/allejo/Sand.png
 end
 
-#Red Jails
+# Red Jails
 jail
    position 0 -339 0
    size 10 2 2
@@ -64,7 +60,7 @@ jail
    color 1
 end
 
-#Blue Jails
+# Blue Jails
 jail
    position 0 339 0
    size 10 2 2
@@ -83,23 +79,23 @@ jail
    color 2
 end
 
-#Spawn Zones
+# Spawn Zones
 zone
-    #Red Spawn Zone
+    # Red Spawn Zone
     pos 0 151 0
     size 196 149 0.1
     team 1
 end
 
 zone
-    #Blue Spawn Zone
+    # Blue Spawn Zone
     pos 0 -151 0
     size 196 149 0.1
     team 2
 end
 
 zone
-    #I don't want the flags on this map, so hide them where no one will find them
+    # I don't want the flags on this map, so hide them where no one will find them
     pos 9999 9999 0
     size 0.1 0.1 0.1
     zoneflag G*
@@ -118,9 +114,9 @@ base
     color 2
 end
 
-#Mesh Perimeter
+# Mesh Perimeter
 mesh
-    #East Wall Mesh
+    # East Wall Mesh
     pos 201 0 0
     size 10 600 20
 
@@ -133,31 +129,31 @@ mesh
     vertex 0.5 0.5 1
     vertex -0.5 0.5 1
 
-    face #south
+    face # south
         vertices 0 1 5 4
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #east
+    face # east
         vertices 1 2 6 5
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #north
+    face # north
         vertices 2 3 7 6
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #west
+    face # west
         vertices 3 0 4 7
     	diffuse 0 0 0 0.2
     endface
-    face #bottom
+    face # bottom
         vertices 3 2 1 0
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #top
+    face # top
         vertices 4 5 6 7
     	diffuse 0 0 0 0.2
         shootthrough
@@ -165,7 +161,7 @@ mesh
 end
 
 mesh
-    #West Wall Mesh
+    # West Wall Mesh
     pos -201 0 0
     size 10 600 20
 
@@ -178,31 +174,31 @@ mesh
     vertex 0.5 0.5 1
     vertex -0.5 0.5 1
 
-    face #south
+    face # south
         vertices 0 1 5 4
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #east
+    face # east
         vertices 1 2 6 5
     	diffuse 0 0 0 0.2
     endface
-    face #north
+    face # north
         vertices 2 3 7 6
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #west
+    face # west
         vertices 3 0 4 7
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #bottom
+    face # bottom
         vertices 3 2 1 0
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #top
+    face # top
         vertices 4 5 6 7
     	diffuse 0 0 0 0.2
         shootthrough
@@ -210,7 +206,7 @@ mesh
 end
 
 mesh
-    #North Wall Mesh
+    # North Wall Mesh
     pos 0 305 0
     size 392 10 20
 
@@ -223,31 +219,31 @@ mesh
     vertex 0.5 0.5 1
     vertex -0.5 0.5 1
 
-    face #south
+    face # south
         vertices 0 1 5 4
     	diffuse 0 0 0 0.2
     endface
-    face #east
+    face # east
         vertices 1 2 6 5
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #north
+    face # north
         vertices 2 3 7 6
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #west
+    face # west
         vertices 3 0 4 7
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #bottom
+    face # bottom
         vertices 3 2 1 0
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #top
+    face # top
         vertices 4 5 6 7
     	diffuse 0 0 0 0.2
         shootthrough
@@ -255,7 +251,7 @@ mesh
 end
 
 mesh
-    #South Wall Mesh
+    # South Wall Mesh
     pos 0 -305 0
     size 392 10 20
 
@@ -268,40 +264,40 @@ mesh
     vertex 0.5 0.5 1
     vertex -0.5 0.5 1
 
-    face #south
+    face # south
         vertices 0 1 5 4
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #east
+    face # east
         vertices 1 2 6 5
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #north
+    face # north
         vertices 2 3 7 6
     	diffuse 0 0 0 0.2
     endface
-    face #west
+    face # west
         vertices 3 0 4 7
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #bottom
+    face # bottom
         vertices 3 2 1 0
     	diffuse 0 0 0 0.2
         shootthrough
     endface
-    face #top
+    face # top
         vertices 4 5 6 7
     	diffuse 0 0 0 0.2
         shootthrough
     endface
 end
 
-#Field Objects
+# Field Objects
 box
-    #Center Divider
+    # Center Divider
 	pos 0 0 0
 	size 200 2 20
 	shootthrough
@@ -310,47 +306,47 @@ box
 end
 
 box
-    #North East Pillar of Field
+    # North East Pillar of Field
     pos 201 305 0
     size 5 5 20
     shootthrough
 end
 
 box
-    #North West Pillar of Field
+    # North West Pillar of Field
     pos -201 305 0
     size 5 5 20
     shootthrough
 end
 
 box
-    #South East Pillar of Field
+    # South East Pillar of Field
     pos 201 -305 0
     size 5 5 20
     shootthrough
 end
 
 box
-    #South West Pillar of Field
+    # South West Pillar of Field
     pos -201 -305 0
     size 5 5 20
     shootthrough
 end
 
 box
-    #East Perimeter Divider
+    # East Perimeter Divider
     pos 231 0 0
     size 25 2 20
 end
 
 box
-    #West Perimeter Divider
+    # West Perimeter Divider
     pos -231 0 0
     size 25 2 20
 end
 
 box
-    #West Perimeter
+    # West Perimeter
     pos -259 0 0
     size 3 372 20
     texture mesh.png
@@ -358,7 +354,7 @@ box
 end
 
 box
-    #East Perimeter
+    # East Perimeter
     pos 259 0 0
     size 3 372 20
     texture mesh.png
@@ -366,7 +362,7 @@ box
 end
 
 box
-    #North Perimeter
+    # North Perimeter
     pos 0 375 0
     size 256 3 20
     texture mesh.png
@@ -374,7 +370,7 @@ box
 end
 
 box
-    #South Perimeter
+    # South Perimeter
     pos 0 -375 0
     size 256 3 20
     texture mesh.png
@@ -382,59 +378,59 @@ box
 end
 
 box
-    #North West Perimeter Pillar
+    # North West Perimeter Pillar
     pos -259 375 0
     size 3 3 20
 end
 
 box
-    #North East Perimeter Pillar
+    # North East Perimeter Pillar
     pos 259 375 0
     size 3 3 20
 end
 
 box
-    #South West Perimeter Pillar
+    # South West Perimeter Pillar
     pos -259 -375 0
     size 3 3 20
 end
 
 box
-    #South East Perimeter Pillar
+    # South East Perimeter Pillar
     pos 259 -375 0
     size 3 3 20
 end
 
-#Perimeter Roofs
+# Perimeter Roofs
 box
-    #North Perimeter Roof
+    # North Perimeter Roof
     pos 0 339 20
     size 262 39 2
     noradar
 end
 
 box
-    #South Perimeter Roof
+    # South Perimeter Roof
     pos 0 -339 20
     size 262 39 2
     noradar
 end
 
 box
-    #West Perimeter Roof
+    # West Perimeter Roof
     pos -229 0 20
     size 33 300 2
     noradar
 end
 
 box
-    #East Perimeter Roof
+    # East Perimeter Roof
     pos 229 0 20
     size 33 300 2
     noradar
 end
 
-#Field Items
+# Field Items
 box
     pos 0 0 0
     size 10 10 5
