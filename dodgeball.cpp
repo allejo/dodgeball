@@ -63,6 +63,7 @@ private:
     void checkGameOver(void);
 
     std::map<bz_eTeamType, TeamJail::Vector> TeamJails;
+    std::map<bz_eTeamType, int> lastKill;
 
     bz_eTeamType TEAM_ONE = eNoTeam;
     bz_eTeamType TEAM_TWO = eNoTeam;
@@ -220,6 +221,7 @@ void Dodgeball::Event(bz_EventData *eventData)
             if (gameModeEnabled)
             {
                 inJail[dieData->playerID] = true;
+                lastKill[dieData->killerTeam] = dieData->killerID;
 
                 // If the killer was in jail, set them free
                 if (inJail[dieData->killerID] && dieData->playerID != dieData->killerID)
@@ -331,8 +333,7 @@ void Dodgeball::checkGameOver(void)
     if (teamsFree == 1)
     {
         gameOverCheckLocked = true;
-        // @TODO Change BZ_SERVER to a player on the winning team
-        bz_triggerFlagCapture(BZ_SERVER, winningTeam, losingTeam);
+        bz_triggerFlagCapture(lastKill[winningTeam], winningTeam, losingTeam);
     }
 }
 
