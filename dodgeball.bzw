@@ -7,7 +7,7 @@
 # could from scratch since the original map was never released.
 
 world
-    freeCTFSpawns
+    freeCtfSpawns
     noWalls
 end
 

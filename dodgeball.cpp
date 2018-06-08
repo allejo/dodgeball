@@ -109,7 +109,7 @@ void Dodgeball::Init(const char* /*commandLine*/)
     if (teams.size() != 2)
     {
         bz_debugMessagef(0, "ERROR :: %s :: The dodgeball game mode only works with two teams. This plug-in will **fail** to load.", PLUGIN_NAME.c_str());
-        bz_debugMessagef(0, "ERROR :: %S ::   %d teams have been detected.", PLUGIN_NAME.c_str(), teams.size());
+        bz_debugMessagef(0, "ERROR :: %s ::   %d teams have been detected.", PLUGIN_NAME.c_str(), teams.size());
 
         return;
     }
