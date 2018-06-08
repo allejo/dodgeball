@@ -6,6 +6,22 @@
 
 Dodgeball is a BZFlag plug-in that introduces a deathmatch-like game mode. Each time a player is killed, they respawn in a "jail" and the only way to escape from jail is to kill an enemy tank while you're in jail. The team that wins the round is the one that manages to place the rest of the entire team in jail.
 
+<table>
+    <tr>
+        <td colspan="2" align="center">
+            <img src=".github/radar.jpg" alt="Radar image of the map">
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src=".github/overview.jpg" alt="Aerial view of the map">
+        </td>
+        <td>
+            <img src=".github/inside_jail.jpg" alt="View of the map from inside a jail">
+        </td>
+    </tr>
+</table>
+
 ## Requirements
 
 - BZFlag 2.4.14+
@@ -53,4 +69,5 @@ end
 
 ## License
 
-[MIT](LICENSE.md)
+- Plug-in: [MIT](LICENSE.md)
+- Map: [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)
