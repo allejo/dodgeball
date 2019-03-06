@@ -31,7 +31,7 @@ Dodgeball is a BZFlag plug-in that introduces a deathmatch-like game mode. Each 
 
 ### Loading the plug-in
 
-This plug-in does not take any specifial configuration options at load time.
+This plug-in does not take any configuration options at load time.
 
 ```
 -loadplugin dodgeball
@@ -57,11 +57,11 @@ jail
   position <x> <y> <z>
   height <height>
   radius <radius>
-  team <team>
+  color <team>
 end
 ```
 
-- `team` - The team color that will spawn inside of this jail. Supported values:
+- `color` - The team color that will spawn inside of this jail. Supported values:
   - 1 - Red Team
   - 2 - Green Team
   - 3 - Blue Team
