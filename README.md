@@ -4,7 +4,7 @@
 ![Minimum BZFlag Version](https://img.shields.io/badge/BZFlag-v2.4.14+-blue.svg)
 [![License](https://img.shields.io/github/license/allejo/dodgeball.svg)](LICENSE.md)
 
-Dodgeball is a BZFlag plug-in that introduces a deathmatch-like game mode. Each time a player is killed, they respawn in a "jail" and the only way to escape from jail is to kill an enemy tank while you're in jail. The team that wins the round is the one that manages to place the rest of the entire team in jail.
+Dodgeball is a BZFlag plug-in that introduces a deathmatch-like game mode. Each time a player is killed, they respawn in a "jail" and the only way to escape from jail is to kill an enemy tank while you're in jail. The team that wins the round is the one that manages to place the rest of the enemy team in jail.
 
 <table>
     <tr>
