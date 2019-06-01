@@ -33,7 +33,7 @@ const std::string PLUGIN_NAME = "Dodgeball";
 const int MAJOR = 1;
 const int MINOR = 1;
 const int REV = 1;
-const int BUILD = 17;
+const int BUILD = 18;
 
 const int MAX_PLAYER_ID = 256;
 
@@ -185,7 +185,7 @@ void Dodgeball::Event(bz_EventData *eventData)
                 spawnData->handled = true;
 
                 float spawnPos[3];
-                auto randomJailID = rand() % TeamJails.size();
+                auto randomJailID = rand() % TeamJails[spawnData->team].size();
 
                 TeamJail zone = TeamJails[spawnData->team].at(randomJailID);
 
