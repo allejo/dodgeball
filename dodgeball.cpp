@@ -33,7 +33,7 @@ const std::string PLUGIN_NAME = "Dodgeball";
 const int MAJOR = 1;
 const int MINOR = 1;
 const int REV = 2;
-const int BUILD = 19;
+const int BUILD = 20;
 
 const int MAX_PLAYER_ID = 256;
 
@@ -368,7 +368,12 @@ bool Dodgeball::isEntireTeamInJail(bz_eTeamType _team)
     {
         int playerID = playerList->get(i);
 
-        if (bz_getPlayerTeam(playerID) == _team && !inJail[playerID])
+        if (bz_getPlayerTeam(playerID) != _team)
+        {
+            continue;
+        }
+
+        if (!inJail[playerID] && bz_getIdleTime(playerID) < 10)
         {
             entireTeamInJail = false;
             break;
