@@ -33,7 +33,7 @@ const std::string PLUGIN_NAME = "Dodgeball";
 const int MAJOR = 1;
 const int MINOR = 1;
 const int REV = 2;
-const int BUILD = 20;
+const int BUILD = 21;
 
 const int MAX_PLAYER_ID = 256;
 
@@ -77,6 +77,13 @@ private:
     /// A minimum of 2 players per team is required. This boolean keeps track of when there are enough players on each
     /// team to allow for a game of dodgeball to start.
     bool gameModeEnabled = false;
+
+    /// This boolean indicates whether or not a dodgeball match is currently in progress. Because the "game over" status
+    /// is checked every server tick, we need a way to indicate that a team has been eliminated and wait until the next
+    /// round starts to avoid spamming "game over" statuses ever tick.
+    ///
+    /// A round is defined as the time a player is first killed since the last game over event.
+    bool matchInProgress = false;
 
     /// An array to store whether or not a player ID is marked as being in jail.
     bool inJail[MAX_PLAYER_ID] = {false};
@@ -204,6 +211,7 @@ void Dodgeball::Event(bz_EventData *eventData)
 
             if (gameModeEnabled)
             {
+                matchInProgress = true;
                 inJail[dieData->playerID] = true;
                 lastKill[dieData->killerTeam] = dieData->killerID;
 
@@ -258,6 +266,11 @@ void Dodgeball::Event(bz_EventData *eventData)
                 bz_sendTextMessage(BZ_SERVER, BZ_ALLUSERS, "Dodgeball has been enabled!");
                 gameModeEnabled = true;
             }
+
+            if (gameModeEnabled)
+            {
+                checkGameOver();
+            }
         }
         break;
 
@@ -291,7 +304,7 @@ std::vector<bz_eTeamType> Dodgeball::getAvailableTeams()
  */
 void Dodgeball::checkGameOver(void)
 {
-    if (gameOverCheckLocked)
+    if (gameOverCheckLocked || !matchInProgress)
     {
         return;
     }
@@ -343,6 +356,7 @@ void Dodgeball::doGameOver(bz_eTeamType winner, bz_eTeamType loser)
     bz_deleteIntList(playerList);
 
     gameOverCheckLocked = false;
+    matchInProgress = false;
 }
 
 /**
