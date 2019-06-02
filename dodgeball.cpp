@@ -32,8 +32,8 @@ const std::string PLUGIN_NAME = "Dodgeball";
 // Define plugin version numbering
 const int MAJOR = 1;
 const int MINOR = 1;
-const int REV = 1;
-const int BUILD = 18;
+const int REV = 2;
+const int BUILD = 19;
 
 const int MAX_PLAYER_ID = 256;
 
@@ -208,7 +208,7 @@ void Dodgeball::Event(bz_EventData *eventData)
                 lastKill[dieData->killerTeam] = dieData->killerID;
 
                 // If the killer was in jail, set them free
-                if (inJail[dieData->killerID] && dieData->playerID != dieData->killerID)
+                if (inJail[dieData->killerID] && dieData->killerTeam != dieData->team)
                 {
                     safelyFreePrisoner(dieData->killerID);
                 }
